@@ -40,5 +40,6 @@ Optionally enter repository.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is under Open Source licence.
+Developed for ZENSOFT test.
 
