@@ -4,8 +4,8 @@ This python file opens all open pull requests addressed to the user for reviewin
 
 ## Getting Started
 
-TThe project contains one python3 file.
-  - bitb
+The project contains one python3 file.
+  - bitbucket.py
 
 ### Prerequisites
 
