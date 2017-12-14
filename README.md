@@ -15,21 +15,7 @@ The project contains one python3 file.
 - Bitbucket team name
 
 
-### Installing 
-
-#### Download the file and run it from terminal
-
-In your terminal go to the directory where file is located.
-
-Run the python3 file
-```
-python3 bitbucket.py
-```
-
-Enter your credentials
-
-
-## Deployment
+## Installation and Deployment
 
 Download the file and run it from terminal
 
@@ -38,8 +24,10 @@ In your terminal go to the directory where file is located.
 Run the python3 file
 ```
 python3 bitbucket.py
+```
 
 Enter valid credentials.
+Optionally enter repository.
 
 
 ## Built With
