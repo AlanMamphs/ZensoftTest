@@ -5,7 +5,7 @@ import webbrowser
 def bitBucketPR():	
 	# method for opening team's bitbucket pull requests to be reviewed by user
 
-	team, username, password, email, repo = '', '', '', '', ''
+	team, username, password, email, repos = '', '', '', '', ''
 	# inquiring user credentials
 	while not username:
 		username =  input("Please enter your BitBucket account username:")
@@ -17,7 +17,7 @@ def bitBucketPR():
 		team     =   input('Please enter your Bitbucket team name:')
 
 	# specifying the repository
-	repo = input("Do you want to search in concrete repository? Indicate it and press enter. Otherwise press enter with empty field:")
+	repos = input("Indicate either a reposiory or a list of repositories dividing each by space and press enter. Leave empty if you want to search in all team repositories:")
 	
 	# requesting data from bitbucket
 	r = requests.get('https://api.bitbucket.org/2.0/repositories/%s'%(team), auth=(email, password))
@@ -27,7 +27,7 @@ def bitBucketPR():
 	if r.status_code == 200:
 
 		# retrieving and storing all available repositories names
-		if not repo:
+		if not repos:
 			data = r.json()
 			repositories = []
 
@@ -69,38 +69,40 @@ def bitBucketPR():
 				print("")
 		
 		else:    # if repository was specified
-			r = requests.get('https://api.bitbucket.org/2.0/repositories/%s/%s/pullrequests'%(team,repo), auth=(email, password))
+
+			repo = repos.split(" ")
 			links= []
-			data = r.json()	
-			
-			if r.status_code == 200: 
+			for element in repo:
+				r = requests.get('https://api.bitbucket.org/2.0/repositories/%s/%s/pullrequests'%(team, element), auth=(email, password))
+				data = r.json()
+				if r.status_code == 200: 
 
-				for value in data['values']:   # iterating over repo's pull requests
-					links.append(value['links']['html']['href'])
-				
+					for value in data['values']:   # iterating over repo's pull requests
+						links.append(value['links']['html']['href'])
+					
 
-				
-				# checking the qty of pull requests
-				# opening if appropriate
+					
+					# checking the qty of pull requests
+					# opening if appropriate
 
-				if len(links)>0 and len(links)<11: # 
-				# iterating over links to open them in the browser
-					for i in links:
-						print ("Opening pull request in default browser....")
+					if len(links)>0 and len(links)<11: # 
+					# iterating over links to open them in the browser
+						for i in links:
+							print ("Opening pull request in default browser....")
 
-						webbrowser.open(i)
+							webbrowser.open(i)
 
-				elif len(links)>10:  # optional. if two many prs even if repo is specified, open 10 prs.
-					print("bitbucket.py")
-					print('Two many PRs.')
-					Print('Opening 10 of them')
-					for i in range(9):
-						print ("Opening pull request in default browser....")
-						webbrowser.open(i)
-			else: # handling 404 
-				print("")
-				print('For repository with this name, nothing was found.')
-				print("")
+					elif len(links)>10:  # optional. if two many prs even if repo is specified, open 10 prs.
+						print("bitbucket.py")
+						print('Two many PRs.')
+						Print('Opening 10 of them')
+						for i in range(9):
+							print ("Opening pull request in default browser....")
+							webbrowser.open(i)
+				else: # handling 404 
+					print("")
+					print('For repository with', element, 'name, nothing was found. Check repository name.')
+					print("")
 
 
 	elif r.status_code == 401: # handling 401 error. 
