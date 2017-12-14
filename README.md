@@ -24,8 +24,9 @@ In your terminal go to the directory where file is located.
 Run the python3 file
 ```
 python3 bitbucket.py
+```
 
-Enter your credentials```
+Enter your credentials
 
 
 ## Deployment
