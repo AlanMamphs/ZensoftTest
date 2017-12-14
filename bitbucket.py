@@ -1,102 +1,116 @@
 import requests
 import json
 import webbrowser
-USERNAME = 'AlanMamphs'
-REPOUSERNAME = 'Alisher123'
-PASSWORD = 'ALI0303sher'
-EMAIL    = 'mamunovalisher@gmail.com'
 
-def userInput():	
-	# username, password, email, repo = '', '', '', ''
+def bitBucketPR():	
+	# method for opening team's bitbucket pull requests to be reviewed by user
 
-	# while not username:
-	# 	username =  input("Please enter your BitBucket account username:")
-	# while not email:
-	# 	email    =  input("Please enter your BitBucket account email:")
-	# while not password:
-	# 	password =  input("Please enter your BitBucket account password:")
-			
+	team, username, password, email, repo = '', '', '', '', ''
+	# inquiring user credentials
+	while not username:
+		username =  input("Please enter your BitBucket account username:")
+	while not email:
+		email    =  input("Please enter your BitBucket account email:")
+	while not password:
+		password =  input("Please enter your BitBucket account password:")
+	while not team:
+		team     =   input('Please enter your Bitbucket team name:')
+
+	# specifying the repository
 	repo = input("Do you want to search in concrete repository? Indicate it and press enter. Otherwise press enter with empty field:")
 	
-	r = requests.get('https://api.bitbucket.org/2.0/repositories/%s'%(USERNAME), auth=(EMAIL, PASSWORD))
+	# requesting data from bitbucket
+	r = requests.get('https://api.bitbucket.org/2.0/repositories/%s'%(team), auth=(email, password))
 
+
+	# checking if data available
 	if r.status_code == 200:
 
+		# retrieving and storing all available repositories names
 		if not repo:
 			data = r.json()
 			repositories = []
+
 			for r in data['values']:
 				repositories.append(r['slug'])
 
-			print (repositories)
-			links = []
-			ids   = []
-			pullrequestslinks = []
-			for rep in repositories:
-				r = requests.get('https://api.bitbucket.org/2.0/repositories/%s/%s/pullrequests'%(USERNAME,rep), auth=(EMAIL, PASSWORD))
-				data = r.json()
-				for value in data['values']:
-					links.append(value['links']['html']['href'])
-					ids.append(value['id'])
-					r = requests.get('https://api.bitbucket.org/2.0/repositories/%s/%s/pullrequests/%d'%(USERNAME,rep, value['id']), auth=(EMAIL, PASSWORD))
-					data = r.json()
-					print (data)
-					print(type(data['participants'][0]['approved']))
-					
-					isReviewer = False;
-					isApproved = True;
-
-					for i in data['reviewers']:
-						if i['username']== REPOUSERNAME:
-							isReviewer == True;
-
-					for i in data['participants']:
-						if i['user']['username']== REPOUSERNAME and i['approved']== False:
-							isApproved == False;
-
-					if data['state'] == 'OPEN' and  isReviewer == True and isApproved ==False :
-					 	pullrequestslinks.append(data['links']['html']['href'])
-
-					print (pullrequestslinks)
+			links = []  # list for appropriate pull requests urls
 			
+			
+			for rep in repositories:      # iterating over found repositories for pull requests
+				r = requests.get('https://api.bitbucket.org/2.0/repositories/%s/%s/pullrequests'%(team,rep), auth=(email, password))
+				data = r.json()
 
+				for value in data['values']:    # accessing each pull request
+					
+					r = requests.get('https://api.bitbucket.org/2.0/repositories/%s/%s/pullrequests/%d'%(team,rep, value['id']), auth=(email, password))
+					data = r.json()
+
+					for i in data['participants']:    # checking if prs are addressed to user for reviewing
+						if i['user']['username'] == username and i['role'] == 'REVIEWER' and i['approved'] == False and data['state']=='OPEN':
+							links.append(data['links']['html']['href']) # appending filtered prs
+
+				
+			# checking the qty of pull requests
+			# opening if appropriate
+			if len(links)>0 and len(links)< 11:
+				for i in links:
+					print ("Opening pull request in default browser....")
+
+					webbrowser.open(i)
+				
+			elif len(links)>10:
+				print("")
+				print("Two many pull requests. Try to filter by repository.")
+				print("")
+			elif len(links)==0: 
+				print("")
+				print("Nothing was found. Try checking your credentials")
+				print("")
 		
+		else:    # if repository was specified
+			r = requests.get('https://api.bitbucket.org/2.0/repositories/%s/%s/pullrequests'%(team,repo), auth=(email, password))
+			links= []
+			data = r.json()	
+			
+			if r.status_code == 200: 
 
-# and 
-userInput()
-# 		data = r.json()
-# 		repositories = []
-# 		for r in data['values']:
-# 			repositories.append(r['slug'])
-# 		r = requests.get('https://api.bitbucket.org/2.0/repositories/%s'%(username), auth=(email, password))
+				for value in data['values']:   # iterating over repo's pull requests
+					links.append(value['links']['html']['href'])
+				
 
+				
+				# checking the qty of pull requests
+				# opening if appropriate
 
-# # 	repo = ""
-# # 	repo  =  
-# # 	username = "AlanMamphs"
-# # 	# repo     = "alanmamphs"
-# # 	password = "ALI0303sher"
-# # 	email    = "mamunovalisher@gmail.com"
+				if len(links)>0 and len(links)<11: # 
+				# iterating over links to open them in the browser
+					for i in links:
+						print ("Opening pull request in default browser....")
 
-# # 	
+						webbrowser.open(i)
 
-# # 		if repositories:
-
-
-# # 	if repo:
-# # 		r = requests.get('https://api.bitbucket.org/2.0/repositories/%s/%s/pullrequests'%(username, repo), auth=(email, password))
-# # 		data = r.json()
-# # 		pullrequests = []
-# # 		for r in data['values']:
-# # 			pullrequests.append(r['links']['html']['href'])
-
-
-# # 		print (pullrequests)
-
-
-# # 	# print (r.status_code)
-
-		
-# # login()
+				elif len(links)>10:  # optional. if two many prs even if repo is specified, open 10 prs.
+					print("bitbucket.py")
+					print('Two many PRs.')
+					Print('Opening 10 of them')
+					for i in range(9):
+						print ("Opening pull request in default browser....")
+						webbrowser.open(i)
+			else: # handling 404 
+				print("")
+				print('For repository with this name, nothing was found.')
+				print("")
 
 
+	elif r.status_code == 401: # handling 401 error. 
+		print("")
+		print ("Unauthorized. Access Denied. Check your credentials. If your Bitbucket account has two-step verification, swith it off in your settings.")
+		print("")
+	elif r.status_code == 404: # handling 404 error
+		print("")
+		print ( "Could not find the pull requests.")
+		print("")
+
+# executing the function
+bitBucketPR()
